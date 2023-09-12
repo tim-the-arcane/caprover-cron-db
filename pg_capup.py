@@ -19,8 +19,18 @@ def slack_notification_helper(content):
     )
 
 def backup_db(database):
-  print(f"Creating backup of {database['name']}.")
+  print(f"Creating backup of {database['name']}...")
+
+  if(database["type"] == "postgres"):
+    backup_pg(database)
+  elif (database["type"] == "mysql"):
+    backup_mysql(database)
+
+def backup_pg(database):
   os.system(f'docker exec $(docker ps -aqf name="{database["name"]}") pg_dump -U {database["username"]} -Fc {database["database"]} > {config["working_path"]}{database["name"]}.sql')
+
+def backup_mysql(database):
+  os.system(f'docker exec $(docker ps -aqf name="{database["name"]}") mysqldump -u {database["username"]} -p{database["password"]} {database["database"]} > {config["working_path"]}{database["name"]}.sql')
 
 def upload_helper(database, location):
   if (location["type"] == "S3"):
